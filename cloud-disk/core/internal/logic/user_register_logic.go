@@ -28,7 +28,7 @@ func NewUserRegisterLogic(ctx context.Context, svcCtx *svc.ServiceContext) *User
 	}
 }
 
-func (l *UserRegisterLogic) UserRegister(req *types.UserRegisterRequest) (resp *types.USerRegisterReply, err error) {
+func (l *UserRegisterLogic) UserRegister(req *types.UserRegisterRequest) (resp *types.UserRegisterReply, err error) {
 	// 判断验证码是否一致
 
 	code, err := l.svcCtx.RDB.Get(l.ctx, req.Email).Result()

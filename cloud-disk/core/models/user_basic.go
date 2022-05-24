@@ -13,6 +13,7 @@ type UserBasic struct {
 	DeletedAt time.Time `xorm:"deleted"`
 }
 
+// TableName used in xorm table name reflection
 func (table UserBasic) TableName() string {
 	return "user_basic"
 }

@@ -7,7 +7,7 @@ type RepositoryPool struct {
 	Identity  string
 	Hash      string
 	Name      string
-	Ext      string
+	Ext       string
 	Size      int64
 	Path      string
 	CreatedAt time.Time `xorm:"created"`
@@ -15,6 +15,6 @@ type RepositoryPool struct {
 	DeletedAt time.Time `xorm:"deleted"`
 }
 
-func (table RepositoryPool) TableName() string{
+func (table RepositoryPool) TableName() string {
 	return "repository_pool"
 }

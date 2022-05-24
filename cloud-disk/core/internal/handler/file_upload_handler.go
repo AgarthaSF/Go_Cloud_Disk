@@ -22,6 +22,13 @@ func FileUploadHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
 			return
 		}
 
+		// use FormFile to parse the uploaded file to get the file content and file header
+		// file header consists of
+		//    Filename string
+		//    Header   textproto.MIMEHeader
+		//    Size     int64
+		//    content  []byte
+		//    tmpfile  string
 		file, fileHeader, err := r.FormFile("file")
 		if err != nil {
 			return
@@ -44,6 +51,8 @@ func FileUploadHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
 			// if the uploaded file exists in COS, then return the fileIdentity directly
 			httpx.OkJson(w,&types.FileUploadReply{
 				Identity: rp.Identity,
+				Ext: rp.Ext,
+				Name: rp.Name,
 			})
 			return
 		}

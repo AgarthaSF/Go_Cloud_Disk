@@ -5,6 +5,7 @@ import (
 	"context"
 	"crypto/md5"
 	"crypto/tls"
+	"errors"
 	"fmt"
 	"github.com/golang-jwt/jwt/v4"
 	"github.com/jordan-wright/email"
@@ -29,7 +30,7 @@ func GenerateToken(id int64, identity string, name string)(string, error){
 		Identity: identity,
 		Name: name,
 	}
-	// 加密uc
+	// use jwt key to encrypt the claim
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, uc)
 	tokenString, err := token.SignedString([]byte(define.JwtKey))
 	if err != nil {
@@ -37,6 +38,25 @@ func GenerateToken(id int64, identity string, name string)(string, error){
 	}
 
 	return tokenString, nil
+}
+
+// AnalyzeToken parsing the token
+func AnalyzeToken(token string) (*define.UserClaim, error){
+	uc := new(define.UserClaim)
+	// use jwt_key to parse claim
+	claims, err := jwt.ParseWithClaims(token, uc, func(token *jwt.Token) (interface{}, error) {
+		return []byte(define.JwtKey), nil
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	// check whether the claim is valid
+	if !claims.Valid{
+		return uc, errors.New("token is invalid")
+	}
+
+	return uc, err
 }
 
 // MailSendCode Send Validation Code to Mail
