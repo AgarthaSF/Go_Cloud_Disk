@@ -1,6 +1,7 @@
 package logic
 
 import (
+	"cloud-disk/core/define"
 	"cloud-disk/core/helper"
 	"cloud-disk/core/models"
 	"context"
@@ -27,7 +28,7 @@ func NewUserLoginLogic(ctx context.Context, svcCtx *svc.ServiceContext) *UserLog
 }
 
 func (l *UserLoginLogic) UserLogin(req *types.LoginRequest) (resp *types.LoginReply, err error) {
-	// 从数据库中查询当前用户
+	// search current user from database
 	user := new(models.UserBasic)
 	get, err := l.svcCtx.Engine.Where("name = ? and password = ?", req.Name, helper.MD5(req.Password)).Get(user)
 	if err != nil {
@@ -38,12 +39,21 @@ func (l *UserLoginLogic) UserLogin(req *types.LoginRequest) (resp *types.LoginRe
 		return nil, errors.New("user name or password is wrong")
 	}
 
-	// 生成Token
-	token, err := helper.GenerateToken(user.Id, user.Identity, user.Name)
+	// generate normal token
+	token, err := helper.GenerateToken(user.Id, user.Identity, user.Name, define.TokenExpireTime)
 	if err != nil {
-		return nil, err
+		return
 	}
+
+	// generate the "refresh token" which is used to refresh other token
+	refreshToken, err := helper.GenerateToken(user.Id, user.Identity, user.Name, define.RefreshTokenExpireTime)
+	if err != nil {
+		return
+	}
+
 	resp = new(types.LoginReply)
 	resp.Token = token
+	resp.RefreshToken = refreshToken
+
 	return
 }

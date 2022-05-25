@@ -14,6 +14,10 @@ service core-api {
 	// user register function
 	@handler UserRegister
 	post /user/register (UserRegisterRequest) returns (UserRegisterReply)
+	
+	// get resource detailed information
+	@handler ShareBasicDetail
+	get /share/basic/detail(ShareBasicDetailRequest) returns (ShareBasicDetailReply)
 }
 
 // when a request enters the router, it will firstly get into middleware,
@@ -43,6 +47,79 @@ service core-api {
 	// create user's folder
 	@handler UserFolderCreate
 	post /user/folder/create(UserFolderCreateRequest) returns(UserFolderCreateReply)
+	
+	// delete user's file: soft delete
+	@handler UserFileDelete
+	post /user/file/delete (UserFileDeleteRequest) returns (UserFileDeleteReply)
+	
+	// move user's file to other folder
+	@handler UserFileMove
+	put /user/file/move (UserFileMoveRequest) returns (UserFileMoveReply)
+	
+	// create share record
+	@handler ShareBasicCreate
+	post /share/basic/create (ShareBasicCreateRequest) returns (ShareBasicCreateReply)
+	
+	@handler ShareBasicSave
+	post /share/basic/save (ShareBasicSaveRequest) returns (ShareBasicSaveReply)
+	
+	// refresh authorization
+	@handler RefreshAuthorization
+	post /refresh/authorization(RefreshAuthorizationRequest) returns(RefreshAuthorizationReply)
+	
+}
+
+type RefreshAuthorizationRequest {
+}
+
+type RefreshAuthorizationReply {
+	Token        string `json:"token"`
+	RefreshToken string `json:"refresh_token"`
+}
+
+type ShareBasicSaveRequest {
+	UserRepositoryIdentity string `json:"user_repository_identity"`
+	ParentId               int64  `json:"parent_id"`
+}
+
+type ShareBasicSaveReply {
+	Identity string `json:"identity"`
+}
+
+type ShareBasicDetailRequest {
+	Identity string `json:"identity"`
+}
+
+type ShareBasicDetailReply {
+	RepositoryIdentity string `json:"repository_identity"`
+	Name               string `json:"name"`
+	Ext                string `json:"ext"`
+	Size               int64  `json:"size"`
+	Path               string `json:"path"`
+}
+
+type ShareBasicCreateRequest {
+	UserRepositoryIdentity string `json:"user_repository_identity"`
+	ExpiredTime            int    `json:"expired_time"`
+}
+
+type ShareBasicCreateReply {
+	Identity string `json:"identity"`
+}
+
+type UserFileMoveRequest {
+	Identity       string `json:"identity"`
+	ParentIdentity string `json:"parent_identity"`
+}
+
+type UserFileMoveReply {
+}
+
+type UserFileDeleteRequest {
+	Identity string `json:"identity"`
+}
+
+type UserFileDeleteReply {
 }
 
 type UserFolderCreateRequest {
@@ -77,7 +154,7 @@ type UserFileListReply {
 type UserFile {
 	Id                 int64  `json:"id"`
 	Identity           string `json:"identity"`
-	RepositoryIdentity string `json:"repositoryIdentity"`
+	RepositoryIdentity string `json:"repository_identity"`
 	Name               string `json:"name"`
 	Ext                string `json:"ext"`
 	Path               string `json:"path"`
@@ -85,8 +162,8 @@ type UserFile {
 }
 
 type UserRepositorySaveRequest {
-	ParentId            int64  `json:"parentId"`
-	Repository_Identity string `json:"repositoryIdentity"`
+	ParentId            int64  `json:"parent_id"`
+	Repository_Identity string `json:"repository_identity"`
 	Ext                 string `json:"ext"`
 	Name                string `json:"name"`
 }
@@ -124,7 +201,8 @@ type LoginRequest {
 }
 
 type LoginReply {
-	Token string `json:"token"`
+	Token        string `json:"token"`
+	RefreshToken string `json:"refresh_token"`
 }
 
 type UserDetailRequest {

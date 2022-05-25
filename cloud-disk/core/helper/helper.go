@@ -23,12 +23,15 @@ func MD5(s string) string{
 	return fmt.Sprintf("%x", md5.Sum([]byte(s)))
 }
 
-func GenerateToken(id int64, identity string, name string)(string, error){
+func GenerateToken(id int64, identity string, name string, expiration int) (string, error) {
 	// generator user's token according to id, identity and name
 	uc := define.UserClaim{
 		Id: id,
 		Identity: identity,
 		Name: name,
+		StandardClaims: jwt.StandardClaims{
+			ExpiresAt: time.Now().Add(time.Second * time.Duration(expiration)).Unix(),
+		},
 	}
 	// use jwt key to encrypt the claim
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, uc)

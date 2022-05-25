@@ -6,8 +6,8 @@ import (
 	"cloud-disk/core/internal/types"
 	"cloud-disk/core/models"
 	"context"
-
 	"github.com/zeromicro/go-zero/core/logx"
+	"time"
 )
 
 type UserFileListLogic struct {
@@ -32,11 +32,11 @@ func (l *UserFileListLogic) UserFileList(req *types.UserFileListRequest, userIde
 
 	// get pagination parameter
 	size := req.Size
-	if size == 0{
+	if size == 0 {
 		size = define.PageSize
 	}
 	page := req.Page
-	if page == 0{
+	if page == 0 {
 		page = 1
 	}
 
@@ -44,11 +44,15 @@ func (l *UserFileListLogic) UserFileList(req *types.UserFileListRequest, userIde
 	offset := (page - 1) * size
 
 	// kind of complex sql query
+
+	l.svcCtx.Engine.ShowSQL(true)
+
 	err = l.svcCtx.Engine.Table("user_repository").
 		Where("parent_id = ? and user_identity = ?", req.Id, userIdentity).
 		Select("user_repository.id, user_repository.identity, user_repository.repository_identity, "+
 			"user_repository.ext, user_repository.name, repository_pool.path, repository_pool.size").
 		Join("LEFT", "repository_pool", "user_repository.repository_identity = repository_pool.identity").
+		Where("user_repository.deleted_at = ? or user_repository.deleted_at is null", time.Time{}.Format(define.DateTime)).
 		Limit(size, offset).Find(&uf)
 	if err != nil {
 		return

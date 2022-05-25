@@ -29,7 +29,7 @@ func NewMailCodeSendRegisterLogic(ctx context.Context, svcCtx *svc.ServiceContex
 }
 
 func (l *MailCodeSendRegisterLogic) MailCodeSendRegister(req *types.MailCodeSendRequest) (resp *types.MailCodeSendReply, err error) {
-	// 前提：该邮箱未注册
+	// premise：the email has not been registered before
 	cnt, err := l.svcCtx.Engine.Where("email = ?", req.Email).Count(new(models.UserBasic))
 	if err != nil {
 		return
@@ -39,10 +39,10 @@ func (l *MailCodeSendRegisterLogic) MailCodeSendRegister(req *types.MailCodeSend
 		return
 	}
 
-	// 生成随机验证码
+	// generate random validation code
 	code := helper.GenerateRandomCode()
 
-	// 将验证码存入redis中
+	// store the email-code kv pair into redis
 	l.svcCtx.RDB.Set(l.ctx, req.Email, code, time.Second*time.Duration(define.CodeExpirationTime))
 
 	err = helper.MailSendCode(req.Email, code)
